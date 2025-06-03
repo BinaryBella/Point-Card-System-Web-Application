@@ -31,12 +31,10 @@ namespace Point_Card_System.Pages
             }
         }
 
-
         void get_branch_code(string user, string password)
         {
             branchcode = cuscon.Get_customer_branchcode(user, password);
             userid = cuscon.Get_userid(user, password);
-
         }
 
         string cusid;
@@ -62,11 +60,18 @@ namespace Point_Card_System.Pages
             }
             else
             {
-                txtCustomerName.Text = "Invalid invoice number or 0 amount invoice";
-                txtCustomerName.ForeColor = System.Drawing.Color.Red;
-
+                // Clear the fields and show SweetAlert2 error
+                txtCustomerName.Text = string.Empty;
                 txtInvoiceAmount.Text = string.Empty;
-                //txtCustomerName.Text = string.Empty;
+
+                // Show SweetAlert2 error message using client script
+                string script = @"
+                    <script type='text/javascript'>
+                        setTimeout(function() {
+                            showInvalidInvoiceAlert();
+                        }, 100);
+                    </script>";
+                ClientScript.RegisterStartupScript(this.GetType(), "InvalidInvoiceAlert", script);
             }
         }
 
@@ -74,8 +79,20 @@ namespace Point_Card_System.Pages
         {
             if (Convert.ToDouble(txtInvoiceAmount.Text) < Convert.ToDouble(txtReturnAmount.Text))
             {
-                string message = "Invalid invoice amount";
-                ClientScript.RegisterStartupScript(this.GetType(), "alert", $"alert('{message}');", true);
+                // Show SweetAlert2 error message for invalid return amount
+                string script = @"
+                    <script type='text/javascript'>
+                        setTimeout(function() {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Invalid Amount',
+                                text: 'Return amount cannot be greater than invoice amount.',
+                                confirmButtonText: 'OK',
+                                confirmButtonColor: '#dc3545'
+                            });
+                        }, 100);
+                    </script>";
+                ClientScript.RegisterStartupScript(this.GetType(), "InvalidAmountAlert", script);
             }
             else
             {
@@ -83,7 +100,6 @@ namespace Point_Card_System.Pages
                 points = Convert.ToDouble(txtReturnAmount.Text) * (0.5 / 100);
                 txtAvailablePoints.Text = points.ToString();
                 txtReturnInvNum.Focus();
-               
             }
         }
 
@@ -111,7 +127,6 @@ namespace Point_Card_System.Pages
             {
                 var parameters = new Dictionary<string, object>
                 {
-
                     { "invoice_no", return_inv_num },
                     { "invoice_amount", double.Parse(return_amt) },
                     { "date", DateTime.Now },
@@ -122,18 +137,46 @@ namespace Point_Card_System.Pages
                     { "Description", "Invoice Return" + " "+invoiceNo},
                     { "cus_id", cusid }
                 };
+
                 cuscon.Insert_return_PointsDetails(parameters);
-                Response.Write("Points Returned: " + name);
 
-                //hfCustomerId.Value = string.Empty;
-                //textbox_Name.Text = "";
+                // Show success SweetAlert2 message
+                string successScript = @"
+                    <script type='text/javascript'>
+                        setTimeout(function() {
+                            showSuccessAlert('Customer points returned successfully.');
+                        }, 100);
+                    </script>";
+                ClientScript.RegisterStartupScript(this.GetType(), "SuccessAlert", successScript);
 
-                //get_customer_code();
+                // Clear form fields after successful save
+                ClearFormFields();
             }
             catch (Exception ex)
             {
-                throw;
+                // Show error SweetAlert2 message
+                string errorScript = @"
+                    <script type='text/javascript'>
+                        setTimeout(function() {
+                            showErrorAlert('Failed to add customer return.');
+                        }, 100);
+                    </script>";
+                ClientScript.RegisterStartupScript(this.GetType(), "ErrorAlert", errorScript);
+
+                // Log the exception (you might want to add proper logging here)
+                // System.Diagnostics.Debug.WriteLine("Error in btnSave_Click: " + ex.Message);
             }
+        }
+
+        private void ClearFormFields()
+        {
+            txtInvoiceNo.Text = string.Empty;
+            txtCustomerName.Text = string.Empty;
+            txtInvoiceAmount.Text = string.Empty;
+            txtReturnAmount.Text = string.Empty;
+            txtAvailablePoints.Text = string.Empty;
+            txtReturnInvNum.Text = string.Empty;
+            btnSave.Enabled = false;
         }
     }
 }

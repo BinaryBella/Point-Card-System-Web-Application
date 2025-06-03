@@ -16,6 +16,7 @@ namespace Point_Card_System.Pages
         CustomerController cuscon = new CustomerController();
         string branchcode = "";
         string userid = "";
+
         protected void Page_Load(object sender, EventArgs e)
         {
             btnSave.Enabled = false;
@@ -31,42 +32,51 @@ namespace Point_Card_System.Pages
                 // If session does not exist (user is not logged in), redirect to login page
                 Response.Redirect("Login.aspx");
             }
-
         }
+
         void get_branch_code(string user, string password)
         {
             branchcode = cuscon.Get_customer_branchcode(user, password);
             userid = cuscon.Get_userid(user, password);
-
         }
 
         string cusid = "";
         string mobile;
+
         protected void txtPhoneNo_TextChanged(object sender, EventArgs e)
         {
             string phone = txtPhoneNo.Text;
-
 
             // Call the method and get the invoice details
             InvoiceDetails details = cuscon.get_cusPoints(phone);
 
             if (details != null && details.CustomerName != "0")
             {
-                //txtInvoiceAmount.Text = details.InvoiceAmount.ToString("N2"); // Format as 2-decimal currency
                 txtCustomerName.Text = details.CustomerName;
                 txtAvailablePoints.Text = (details.totalpoints).ToString();
                 mobile = details.MobileNumber;
                 cusid = details.CustomerId;
 
-
                 txtCustomerName.ForeColor = System.Drawing.Color.Blue;
-
                 txtInvoiceNum.Focus();
             }
             else
             {
-                txtCustomerName.Text = "Invalid Mobile or not Registerd";
-                txtCustomerName.ForeColor = System.Drawing.Color.Red;
+                // Clear the fields
+                txtCustomerName.Text = "";
+                txtAvailablePoints.Text = "";
+
+                // Show SweetAlert2 error message
+                string script = @"
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Invalid Mobile Number',
+                        text: 'Invalid mobile number or not registered',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc3545'
+                    });";
+
+                ClientScript.RegisterStartupScript(this.GetType(), "InvalidMobileAlert", script, true);
             }
         }
 
@@ -79,8 +89,17 @@ namespace Point_Card_System.Pages
             }
             else
             {
-                string message = "Sorry You cannot claim this ammount! Minimum Points Should be 1000 to Redeam!";
-                ClientScript.RegisterStartupScript(this.GetType(), "alert", $"alert('{message}');", true);
+                // Show SweetAlert2 warning message for insufficient points
+                string script = @"
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Insufficient Points',
+                        text: 'Sorry! You cannot claim this amount. Minimum points should be 1000 to redeem!',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#ffc107'
+                    });";
+
+                ClientScript.RegisterStartupScript(this.GetType(), "InsufficientPointsAlert", script, true);
             }
         }
 
@@ -89,7 +108,6 @@ namespace Point_Card_System.Pages
             string phone = txtPhoneNo.Text;
             InvoiceDetails details = cuscon.get_cusPoints(phone);
             string name = txtCustomerName.Text;
-
             string points = txtClaimingPoints.Text;
             string branchid = branchcode;
             cusid = details.CustomerId;
@@ -106,17 +124,37 @@ namespace Point_Card_System.Pages
                     { "Description", "Points Claims for" + " "+txtInvoiceNum.Text},
                     { "cus_id", cusid }
                 };
+
                 cuscon.Insert_Claimed_Points(parameters);
-                Response.Write("Points Claimed: " + name);
 
-                //hfCustomerId.Value = string.Empty;
-                //textbox_Name.Text = "";
+                // Show success message with SweetAlert2
+                string script = @"
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'Points Claimed Successfully!',
+                        text: 'Points have been claimed for " + name + @"',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#28a745'
+                    }).then(function() {
+                        // Clear form or redirect as needed
+                        window.location.href = window.location.href;
+                    });";
 
-                //get_customer_code();
+                ClientScript.RegisterStartupScript(this.GetType(), "SuccessAlert", script, true);
             }
             catch (Exception ex)
             {
-                throw;
+                // Show error message with SweetAlert2
+                string script = @"
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error',
+                        text: 'An error occurred while processing your request. Please try again.',
+                        confirmButtonText: 'OK',
+                        confirmButtonColor: '#dc3545'
+                    });";
+
+                ClientScript.RegisterStartupScript(this.GetType(), "ErrorAlert", script, true);
             }
         }
 

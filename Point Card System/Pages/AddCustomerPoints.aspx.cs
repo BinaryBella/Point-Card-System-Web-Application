@@ -17,6 +17,7 @@ namespace Point_Card_System.Pages
         CustomerController cuscon = new CustomerController();
         string branchcode = "";
         string userid = "";
+
         protected void Page_Load(object sender, EventArgs e)
         {
             string username = Session["Username"] as string;
@@ -37,8 +38,8 @@ namespace Point_Card_System.Pages
         {
             branchcode = cuscon.Get_customer_branchcode(user, password);
             userid = cuscon.Get_userid(user, password);
-
         }
+
         protected void btnSave_Click(object sender, EventArgs e)
         {
             // Example: Save entered data
@@ -53,7 +54,6 @@ namespace Point_Card_System.Pages
             {
                 var parameters = new Dictionary<string, object>
                 {
-                    
                     { "Mobile_Number", phone },
                     { "Branch_ID", branchcode },
                     { "Created_Date", DateTime.Now },
@@ -62,55 +62,99 @@ namespace Point_Card_System.Pages
                     { "user", userid},
                     { "invoice_number", invoiceNo }
                 };
+
+                // Call the method to insert points
                 cuscon.InsertPointsDetails(parameters);
-                Response.Write("Pints Added: " + name);
 
-                //hfCustomerId.Value = string.Empty;
-                //textbox_Name.Text = "";
+                // If we reach this point without exception, consider it successful
+                // Success - Show SweetAlert2 success message
+                string script = "showSuccessAlert('Customer points added successfully.');";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowSuccessAlert", script, true);
 
-                //get_customer_code();
+                // Clear form fields after successful save
+                ClearFormFields();
             }
-            catch (Exception)
+            catch (Exception ex)
             {
-                throw;
+                // Exception occurred - Show SweetAlert2 error message
+                string script = "showErrorAlert('Failed to add customer points. Error: " + ex.Message.Replace("'", "\\'") + "');";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowErrorAlert", script, true);
             }
-            
+        }
+
+        private void ClearFormFields()
+        {
+            txtCustomerPhoneNo.Text = "";
+            txtCustomerName.Text = "";
+            txtInvoiceNo.Text = "";
+            txtInvoiceTotal.Text = "";
+            txtPoints.Text = "";
+            txtCustomerName.ForeColor = System.Drawing.Color.Black;
         }
 
         protected void txtInvoiceTotal_TextChanged(object sender, EventArgs e)
         {
-            double points = 0;
-            points = Convert.ToDouble(txtInvoiceTotal.Text) * (0.5 / 100);
-            txtPoints.Text = points.ToString();
+            try
+            {
+                if (!string.IsNullOrEmpty(txtInvoiceTotal.Text))
+                {
+                    double points = 0;
+                    points = Convert.ToDouble(txtInvoiceTotal.Text) * (0.5 / 100);
+                    txtPoints.Text = points.ToString("F2"); // Format to 2 decimal places
+                }
+                else
+                {
+                    txtPoints.Text = "";
+                }
+            }
+            catch (Exception)
+            {
+                txtPoints.Text = "0.00";
+            }
         }
 
-
-        string cusid="";
+        string cusid = "";
         string mobile;
+
         protected void txtCustomerPhoneNo_TextChanged(object sender, EventArgs e)
         {
             string phone = txtCustomerPhoneNo.Text;
-            string invnum = txtInvoiceNo.Text;
 
-            // Call the method and get the invoice details
-            InvoiceDetails details = cuscon.get_cusname(phone);
-
-            if (details != null && details.CustomerName != "0")
+            try
             {
-                //txtInvoiceAmount.Text = details.InvoiceAmount.ToString("N2"); // Format as 2-decimal currency
-                txtCustomerName.Text = details.CustomerName;
-                mobile = details.MobileNumber;
-                cusid = details.CustomerId;
+                // Call the method and get the invoice details
+                InvoiceDetails details = cuscon.get_cusname(phone);
 
-                
-                txtCustomerName.ForeColor = System.Drawing.Color.Blue;
+                if (details != null && details.CustomerName != "0")
+                {
+                    txtCustomerName.Text = details.CustomerName;
+                    mobile = details.MobileNumber;
+                    cusid = details.CustomerId;
+                    txtCustomerName.ForeColor = System.Drawing.Color.Blue;
+                    txtInvoiceNo.Focus();
+                }
+                else
+                {
+                    txtCustomerName.Text = "";
+                    txtCustomerName.ForeColor = System.Drawing.Color.Black;
+                    // Clear other fields when customer is not found
+                    txtInvoiceNo.Text = "";
+                    txtInvoiceTotal.Text = "";
+                    txtPoints.Text = "";
 
-                txtInvoiceNo.Focus();
+                    // Show SweetAlert2 warning message for invalid mobile number
+                    string script = "showWarningAlert('Invalid mobile number or not registered');";
+                    ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowWarningAlert", script, true);
+                }
             }
-            else
+            catch (Exception ex)
             {
-                txtCustomerName.Text = "Invalid Mobile or not Registerd";
+                txtCustomerName.Text = "Error retrieving customer details";
                 txtCustomerName.ForeColor = System.Drawing.Color.Red;
+
+                // Show error alert for customer lookup failure
+                string script = "showErrorAlert('Error retrieving customer details: " + ex.Message.Replace("'", "\\'") + "');";
+                ScriptManager.RegisterStartupScript(this, this.GetType(), "ShowCustomerErrorAlert", script, true);
             }
         }
     }
