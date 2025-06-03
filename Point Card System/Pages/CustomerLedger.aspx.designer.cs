@@ -15,13 +15,31 @@ namespace Point_Card_System.Pages
     {
 
         /// <summary>
-        /// txt_SearchPhone control.
+        /// lblPhoneSearch control.
         /// </summary>
         /// <remarks>
         /// Auto-generated field.
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
-        protected global::System.Web.UI.WebControls.DropDownList txt_SearchPhone;
+        protected global::System.Web.UI.WebControls.Label lblPhoneSearch;
+
+        /// <summary>
+        /// txtPhoneSearch control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtPhoneSearch;
+
+        /// <summary>
+        /// rptPhoneNumbers control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.Repeater rptPhoneNumbers;
 
         /// <summary>
         /// lblName control.
@@ -112,5 +130,14 @@ namespace Point_Card_System.Pages
         /// To modify move field declaration from designer file to code-behind file.
         /// </remarks>
         protected global::System.Web.UI.WebControls.GridView gv_Transactions;
+
+        /// <summary>
+        /// hfAllPhoneNumbers control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.HiddenField hfAllPhoneNumbers;
     }
 }
