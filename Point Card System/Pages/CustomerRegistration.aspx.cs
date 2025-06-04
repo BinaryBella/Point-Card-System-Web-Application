@@ -13,7 +13,7 @@ namespace Point_Card_System.Pages
     {
         CustomerController cuscon = new CustomerController();
         string branchcode = "";
-
+        
         protected void Page_Load(object sender, EventArgs e)
         {
             string username = Session["Username"] as string;
@@ -26,11 +26,15 @@ namespace Point_Card_System.Pages
             {
                 Response.Redirect("Login.aspx");
             }
+
             if (!IsPostBack)
             {
                 get_customer_code();
+                txtRegisteredDate.Text = DateTime.Now.ToString("yyyy-MM-dd"); 
+                txtRegisteredBranch.Text = branchcode;
             }
         }
+
 
         void get_customer_code()
         {
@@ -81,15 +85,21 @@ namespace Point_Card_System.Pages
                 }
                 else
                 {
-                    // Insert new customer
-                    cuscon.InsertCustomer(parameters);
+                    string customerName = txtCustomerName.Text.Trim();
+                    string mobileNumber = txtPhoneNo.Text.Trim();
 
-                    // Assume success if no exception is thrown
+                    // Block registration if either name or phone exists
+                    if (cuscon.IsCustomerExists(customerName, mobileNumber))
+                    {
+                        ShowErrorMessage("A customer with this name or phone number already exists.");
+                        return;
+                    }
+
+                    cuscon.InsertCustomer(parameters);
                     ShowSuccessMessage("Customer registration successful");
                     ClearFormFields();
                     get_customer_code();
                 }
-
                 hfCustomerId.Value = string.Empty;
             }
             catch (Exception ex)
@@ -178,7 +188,7 @@ namespace Point_Card_System.Pages
                     confirmButtonText: 'OK',
                     confirmButtonColor: '#dc3545'
                 }});";
-
+           
             ClientScript.RegisterStartupScript(this.GetType(), "showError", script, true);
         }
 

@@ -29,6 +29,24 @@ namespace Point_Card_System.DAL
             }
         }
 
+        public bool IsCustomerExists(string customerName, string mobileNumber)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            using (SqlCommand cmd = new SqlCommand("sp_CheckCustomerExists", con))
+            {
+                cmd.CommandType = CommandType.StoredProcedure;
+
+                cmd.Parameters.AddWithValue("@Customer_Name", customerName.Trim());
+                cmd.Parameters.AddWithValue("@Mobile_Number", mobileNumber.Trim());
+
+                con.Open();
+                int existingCount = Convert.ToInt32(cmd.ExecuteScalar());
+                return existingCount > 0;
+            }
+        }
+
+
+
         public string Get_customer_branchcode(string user, string pass)
         {
             // Ensure the connection string is correctly set
