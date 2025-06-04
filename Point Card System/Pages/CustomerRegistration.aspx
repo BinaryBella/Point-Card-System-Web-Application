@@ -79,7 +79,8 @@
 
                         <div class="form-group">
                             <label for="txtRegisteredDate" class="form-label">Customer Registered Date</label>
-                            <input type="date" id="txtRegisteredDate" class="form-control" value="2024-09-09" readonly/>
+                            <asp:TextBox ID="txtRegisteredDate" runat="server" class="form-control" ReadOnly="true" TextMode="Date" />
+                            <%-- <input type="date" id="txtRegisteredDate" class="form-control" value="2024-09-09" readonly/>--%>
                         </div>
 
                         <div class="form-group">

@@ -123,6 +123,15 @@ namespace Point_Card_System.Pages
         protected global::System.Web.UI.WebControls.TextBox txtClammingPoints;
 
         /// <summary>
+        /// txtRegisteredDate control.
+        /// </summary>
+        /// <remarks>
+        /// Auto-generated field.
+        /// To modify move field declaration from designer file to code-behind file.
+        /// </remarks>
+        protected global::System.Web.UI.WebControls.TextBox txtRegisteredDate;
+
+        /// <summary>
         /// txtRegisteredBranch control.
         /// </summary>
         /// <remarks>
