@@ -312,19 +312,27 @@ namespace Point_Card_System.Authentication
                     using (SqlCommand cmd = new SqlCommand("SP_Master_User_Authenticate", con))
                     {
                         cmd.CommandType = CommandType.StoredProcedure;
-                        cmd.CommandTimeout = 30; // Set timeout
+                        cmd.CommandTimeout = 30;
 
-                        // Add parameters to prevent SQL injection
                         cmd.Parameters.AddWithValue("@Username", username);
                         cmd.Parameters.AddWithValue("@Password", password);
 
                         con.Open();
-                        object result = cmd.ExecuteScalar();
-
-                        if (result != null && result != DBNull.Value)
+                        using (SqlDataReader reader = cmd.ExecuteReader())
                         {
-                            int codereturn = Convert.ToInt32(result);
-                            return codereturn == 1;
+                            if (reader.Read())
+                            {
+                                int codereturn = Convert.ToInt32(reader["codereturn"]);
+                                if (codereturn == 1)
+                                {
+                                    // ✅ Store these in Session
+                                    Session["Username"] = username;
+                                    Session["Password"] = password;
+                                    Session["user_level"] = Convert.ToInt32(reader["user_level"]);
+                                    Session["branch_id"] = reader["branch_id"].ToString();
+                                    return true;
+                                }
+                            }
                         }
 
                         return false;
@@ -333,17 +341,15 @@ namespace Point_Card_System.Authentication
             }
             catch (SqlException)
             {
-                // Re-throw to be handled by calling method
                 throw;
             }
             catch (Exception)
             {
-                // Re-throw to be handled by calling method
                 throw;
             }
         }
 
-        // SHA256 hash method for future use if needed
+
         private string ComputeSha256Hash(string rawData)
         {
             try
