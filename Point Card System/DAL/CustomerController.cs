@@ -348,5 +348,143 @@ namespace Point_Card_System.DAL
             }
         }
 
+        // Add these methods to your existing CustomerController class
+
+        // Get user level from User_Master table
+        public int Get_user_level(string user, string pass)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SP_Get_UserLevel", con)) // You'll need to create this stored procedure
+                {
+                    cmd.CommandType = CommandType.StoredProcedure;
+                    cmd.Parameters.AddWithValue("@User", user);
+                    cmd.Parameters.AddWithValue("@Pass", pass);
+
+                    try
+                    {
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+                        con.Close();
+
+                        return result != null ? Convert.ToInt32(result) : 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        return 0; // Default to 0 if error
+                    }
+                }
+            }
+        }
+
+        // Alternative method using direct SQL query if you prefer not to create stored procedure
+        public int Get_user_level_direct(string user, string pass)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SELECT user_level FROM User_Master WHERE user_id = @User AND password = @Pass", con))
+                {
+                    cmd.Parameters.AddWithValue("@User", user);
+                    cmd.Parameters.AddWithValue("@Pass", pass);
+
+                    try
+                    {
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+                        con.Close();
+
+                        return result != null ? Convert.ToInt32(result) : 0;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        return 0;
+                    }
+                }
+            }
+        }
+
+        // Get all branches for dropdown
+        public DataTable GetAllBranches()
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SELECT branch_id, branch_name FROM Branch_Master ORDER BY branch_name", con))
+                {
+                    try
+                    {
+                        con.Open();
+                        SqlDataAdapter adapter = new SqlDataAdapter(cmd);
+                        DataTable dt = new DataTable();
+                        adapter.Fill(dt);
+                        return dt;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        return new DataTable();
+                    }
+                }
+            }
+        }
+
+        // Get branch name by branch ID
+        public string GetBranchName(string branchId)
+        {
+            using (SqlConnection con = new SqlConnection(connectionString))
+            {
+                using (SqlCommand cmd = new SqlCommand("SELECT branch_name FROM Branch_Master WHERE branch_id = @BranchId", con))
+                {
+                    cmd.Parameters.AddWithValue("@BranchId", branchId);
+
+                    try
+                    {
+                        con.Open();
+                        object result = cmd.ExecuteScalar();
+                        con.Close();
+
+                        return result != null ? result.ToString() : branchId;
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine(ex.Message);
+                        return branchId; // Return branch ID if name not found
+                    }
+                }
+            }
+        }
+
+        //dashboard
+        public int GetRegisteredCustomerCount()
+        {
+            int customerCount = 0;
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand command = new SqlCommand("sp_GetRegisteredCustomerCount", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        connection.Open();
+                        object result = command.ExecuteScalar();
+
+                        if (result != null && result != DBNull.Value)
+                        {
+                            customerCount = Convert.ToInt32(result);
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception (implement logging as needed)
+                throw new Exception("Error retrieving customer count: " + ex.Message);
+            }
+
+            return customerCount;
+        }
     }
 }

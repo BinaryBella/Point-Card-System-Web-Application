@@ -80,12 +80,16 @@
                         <div class="form-group">
                             <label for="txtRegisteredDate" class="form-label">Customer Registered Date</label>
                             <asp:TextBox ID="txtRegisteredDate" runat="server" class="form-control" ReadOnly="true" TextMode="Date" />
-                            <%-- <input type="date" id="txtRegisteredDate" class="form-control" value="2024-09-09" readonly/>--%>
                         </div>
 
                         <div class="form-group">
-                            <label for="txtRegisteredBranch" class="form-label">Customer Registered Branch</label>
-                            <asp:TextBox ID="txtRegisteredBranch" runat="server" class="form-control" value="" readonly ></asp:TextBox>
+                            <label for="txtRegisteredBranch" class="form-label">Customer Registered Branch <span style="color: red;">*</span></label>
+                            <!-- Dropdown for user level 1 -->
+                            <asp:DropDownList ID="ddlRegisteredBranch" runat="server" class="form-control" Visible="false">
+                            </asp:DropDownList>
+                            <!-- TextBox for other user levels -->
+                            <asp:TextBox ID="txtRegisteredBranch" runat="server" class="form-control" value="" ReadOnly="true" Visible="false"></asp:TextBox>
+                            <div class="error-message" id="branchError">Please select a branch</div>
                         </div>
                     </div>
                 </div>
@@ -189,6 +193,27 @@
             }
         }
 
+        function validateBranch() {
+            const ddlBranch = document.getElementById('<%= ddlRegisteredBranch.ClientID %>');
+            const errorDiv = document.getElementById('branchError');
+            
+            // Only validate if dropdown is visible (user level 1)
+            if (ddlBranch && ddlBranch.style.display !== 'none' && ddlBranch.offsetParent !== null) {
+                if (ddlBranch.value === '') {
+                    ddlBranch.classList.add('error');
+                    ddlBranch.classList.remove('valid');
+                    errorDiv.style.display = 'block';
+                    return false;
+                } else {
+                    ddlBranch.classList.remove('error');
+                    ddlBranch.classList.add('valid');
+                    errorDiv.style.display = 'none';
+                    return true;
+                }
+            }
+            return true; // If dropdown is not visible, validation passes
+        }
+
         // Form validation function called on submit
         function validateForm() {
             let isValid = true;
@@ -205,6 +230,11 @@
             
             // Validate Phone Number
             if (!validatePhoneNumber()) {
+                isValid = false;
+            }
+
+            // Validate Branch (for user level 1)
+            if (!validateBranch()) {
                 isValid = false;
             }
             
@@ -228,11 +258,16 @@
             const customerNameField = document.getElementById('<%= txtCustomerName.ClientID %>');
             const nicField = document.getElementById('<%= txtNIC.ClientID %>');
             const phoneNoField = document.getElementById('<%= txtPhoneNo.ClientID %>');
+            const branchDropdown = document.getElementById('<%= ddlRegisteredBranch.ClientID %>');
 
             // Add real-time validation on blur (when user leaves the field)
             customerNameField.addEventListener('blur', validateCustomerName);
             nicField.addEventListener('blur', validateNIC);
             phoneNoField.addEventListener('blur', validatePhoneNumber);
+            
+            if (branchDropdown) {
+                branchDropdown.addEventListener('change', validateBranch);
+            }
 
             // Add real-time validation on input (as user types)
             customerNameField.addEventListener('input', function () {
