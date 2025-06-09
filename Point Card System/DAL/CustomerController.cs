@@ -486,5 +486,48 @@ namespace Point_Card_System.DAL
 
             return customerCount;
         }
+
+        public class PointsDashboard
+        {
+            public double TotalPointsIssued { get; set; }
+            public double TotalClaimablePointsIssued { get; set; }
+        }
+
+        public PointsDashboard GetPointsDashboard()
+        {
+            PointsDashboard pointsDashboard = new PointsDashboard();
+
+            try
+            {
+                using (SqlConnection connection = new SqlConnection(connectionString))
+                {
+                    using (SqlCommand command = new SqlCommand("SP_GetPointsDashboard", connection))
+                    {
+                        command.CommandType = CommandType.StoredProcedure;
+
+                        connection.Open();
+                        using (SqlDataReader reader = command.ExecuteReader())
+                        {
+                            if (reader.Read())
+                            {
+                                pointsDashboard.TotalPointsIssued = reader["TotalPointsIssued"] != DBNull.Value
+                                    ? Convert.ToDouble(reader["TotalPointsIssued"]) : 0;
+
+                                pointsDashboard.TotalClaimablePointsIssued = reader["TotalClaimablePointsIssued"] != DBNull.Value
+                                    ? Convert.ToDouble(reader["TotalClaimablePointsIssued"]) : 0;
+                            }
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                // Log the exception as needed
+                Console.WriteLine("Error retrieving points dashboard: " + ex.Message);
+                // Optionally return default 0 values in case of error
+            }
+
+            return pointsDashboard;
+        }
     }
 }

@@ -148,27 +148,27 @@
                     </div>
                 </div>
                 
-                <!-- Total Points Card -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="dashboard-card points">
-                        <div class="card-icon">
-                            <i class="bi bi-star-fill"></i>
-                        </div>
-                        <div class="card-number">15,847</div>
-                        <div class="card-text">Total Points Issued</div>
+            <!-- Total Points Issued Card -->
+            <div class="col-lg-4 col-md-6">
+                <div class="dashboard-card points">
+                    <div class="card-icon">
+                        <i class="bi bi-star-fill"></i>
                     </div>
+                    <div class="card-number"><%= TotalPointsIssued.ToString("N0") %></div>
+                    <div class="card-text">Total Points Issued</div>
                 </div>
-                
-                <!-- Transactions Card -->
-                <div class="col-lg-4 col-md-6">
-                    <div class="dashboard-card transactions">
-                        <div class="card-icon">
-                            <i class="bi bi-receipt"></i>
-                        </div>
-                        <div class="card-number">1,256</div>
-                        <div class="card-text">Total Transactions</div>
+            </div>
+            
+            <!-- Claimable Points Card -->
+            <div class="col-lg-4 col-md-6">
+                <div class="dashboard-card points">
+                    <div class="card-icon">
+                        <i class="bi bi-star-half"></i>
                     </div>
+                    <div class="card-number"><%= TotalClaimablePointsIssued.ToString("N0") %></div>
+                    <div class="card-text">Total Claimable Points Issued</div>
                 </div>
+            </div>
             </div>
             
             <!-- Second Row of Cards -->
